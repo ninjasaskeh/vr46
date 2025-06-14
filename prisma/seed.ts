@@ -1,4 +1,3 @@
-// prisma/seed.ts
 import {
   PrismaClient,
   UserRole,
@@ -93,7 +92,7 @@ async function main() {
         status: SupplierStatus.ACTIVE,
         rating: 4.5,
         totalOrders: 156,
-        lastOrder: new Date("2025-04-15"),
+        lastOrder: new Date("2025-01-15"),
       },
     }),
     prisma.supplier.upsert({
@@ -109,7 +108,7 @@ async function main() {
         status: SupplierStatus.ACTIVE,
         rating: 4.8,
         totalOrders: 89,
-        lastOrder: new Date("2025-04-14"),
+        lastOrder: new Date("2025-01-14"),
       },
     }),
     prisma.supplier.upsert({
@@ -125,7 +124,7 @@ async function main() {
         status: SupplierStatus.ACTIVE,
         rating: 4.2,
         totalOrders: 67,
-        lastOrder: new Date("2025-04-13"),
+        lastOrder: new Date("2025-01-13"),
       },
     }),
   ]);
@@ -209,8 +208,8 @@ async function main() {
         vehicleNumber: "B 1234 ABC",
         operatorId: operator.id,
         status: WeightStatus.COMPLETED,
-        entryDate: new Date("2025-04-15T08:00:00"),
-        weighingDate: new Date("2025-04-15T09:24:00"),
+        entryDate: new Date("2025-01-15T08:00:00"),
+        weighingDate: new Date("2025-01-15T09:24:00"),
       },
     }),
     prisma.weightRecord.create({
@@ -222,8 +221,8 @@ async function main() {
         vehicleNumber: "B 5678 DEF",
         operatorId: operator.id,
         status: WeightStatus.COMPLETED,
-        entryDate: new Date("2025-04-15T08:30:00"),
-        weighingDate: new Date("2025-04-15T09:15:00"),
+        entryDate: new Date("2025-01-15T08:30:00"),
+        weighingDate: new Date("2025-01-15T09:15:00"),
       },
     }),
     prisma.weightRecord.create({
@@ -235,8 +234,8 @@ async function main() {
         vehicleNumber: "B 9012 GHI",
         operatorId: operator.id,
         status: WeightStatus.COMPLETED,
-        entryDate: new Date("2025-04-15T08:15:00"),
-        weighingDate: new Date("2025-04-15T08:52:00"),
+        entryDate: new Date("2025-01-15T08:15:00"),
+        weighingDate: new Date("2025-01-15T08:52:00"),
       },
     }),
     prisma.weightRecord.create({
@@ -248,7 +247,7 @@ async function main() {
         vehicleNumber: "B 3456 JKL",
         operatorId: operator.id,
         status: WeightStatus.PENDING,
-        entryDate: new Date("2025-04-15T08:00:00"),
+        entryDate: new Date("2025-01-15T08:00:00"),
       },
     }),
   ]);
@@ -260,8 +259,7 @@ async function main() {
     prisma.notification.create({
       data: {
         title: "Low Stock Alert",
-        message:
-          "Concrete Block inventory is running low (25 pieces remaining)",
+        message: "Concrete Block inventory is running low (25 pieces remaining)",
         type: NotificationType.WARNING,
         category: "Inventory",
         priority: NotificationPriority.HIGH,
@@ -271,7 +269,7 @@ async function main() {
     prisma.notification.create({
       data: {
         title: "Weight Record Completed",
-        message: "Weight record WR-3842 has been successfully processed",
+        message: "Weight record has been successfully processed",
         type: NotificationType.SUCCESS,
         category: "Operations",
         priority: NotificationPriority.NORMAL,
@@ -291,8 +289,7 @@ async function main() {
     prisma.notification.create({
       data: {
         title: "System Maintenance Scheduled",
-        message:
-          "Scheduled maintenance on April 20, 2025 from 02:00 - 04:00 AM",
+        message: "Scheduled maintenance on January 20, 2025 from 02:00 - 04:00 AM",
         type: NotificationType.INFO,
         category: "System",
         priority: NotificationPriority.LOW,

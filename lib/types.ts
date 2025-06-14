@@ -22,6 +22,7 @@ export interface Material {
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
+  user?: User;
 }
 
 export interface WeightRecord {
