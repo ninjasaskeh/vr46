@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Scale, Search, Filter, Truck, User } from 'lucide-react';
+import { Scale, Search, Filter, Truck, User, RefreshCw, Eye } from 'lucide-react';
 import { WeightRecord } from '@/lib/types';
 import { formatDate, formatWeight, getStatusColor } from '@/lib/utils';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export default function WeightRecordsPage() {
   const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
@@ -30,15 +31,35 @@ export default function WeightRecordsPage() {
       
       if (selectedStatus) params.status = selectedStatus;
 
-      const response = await apiClient.get<WeightRecord[]>('/api/weight-records', params);
+      const response = await apiClient.get<{ data: WeightRecord[] }>('/api/weight-records', params);
       if (response.success && response.data) {
-        setWeightRecords(response.data);
+        setWeightRecords(response.data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch weight records:', error);
+      toast.error('Failed to fetch weight records');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    toast.promise(fetchWeightRecords(), {
+      loading: 'Refreshing weight records...',
+      success: 'Weight records refreshed successfully!',
+      error: 'Failed to refresh weight records',
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedStatus('');
+    toast.info('Filters cleared');
+  };
+
+  const handleViewDetails = (record: WeightRecord) => {
+    toast.info(`Viewing details for record: ${record.id}`);
+    // Here you could open a modal or navigate to a detail page
   };
 
   const filteredRecords = weightRecords.filter(record =>
@@ -54,13 +75,19 @@ export default function WeightRecordsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Weight Records</h1>
-          <p className="text-gray-500">Monitor and manage weighing operations</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Weight Records</h1>
+          <p className="text-gray-500 dark:text-gray-400">Monitor and manage weighing operations</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleRefresh} variant="outline" className="btn-animate">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -68,7 +95,7 @@ export default function WeightRecordsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -81,19 +108,26 @@ export default function WeightRecordsPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background"
             >
               <option value="">All Status</option>
               {statuses.map(status => (
                 <option key={status} value={status}>{status.replace('_', ' ')}</option>
               ))}
             </select>
+            <Button 
+              variant="outline" 
+              onClick={handleClearFilters}
+              className="btn-animate"
+            >
+              Clear Filters
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Weight Records Table */}
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Scale className="h-5 w-5" />
@@ -105,9 +139,15 @@ export default function WeightRecordsPage() {
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-12 bg-gray-200 rounded"></div>
+                  <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 </div>
               ))}
+            </div>
+          ) : filteredRecords.length === 0 ? (
+            <div className="text-center py-8">
+              <Scale className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold text-muted-foreground">No weight records found</h3>
+              <p className="text-muted-foreground">Try adjusting your filters or check back later</p>
             </div>
           ) : (
             <Table>
@@ -121,11 +161,12 @@ export default function WeightRecordsPage() {
                   <TableHead>Net Weight</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRecords.map((record) => (
-                  <TableRow key={record.id}>
+                  <TableRow key={record.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       {record.material?.name || 'Unknown'}
                     </TableCell>
@@ -153,6 +194,17 @@ export default function WeightRecordsPage() {
                     </TableCell>
                     <TableCell>
                       {formatDate(record.weighingDate || record.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(record)}
+                        className="btn-animate"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

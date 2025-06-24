@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Material } from '@/lib/types';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 interface MaterialDialogProps {
   open: boolean;
@@ -45,7 +47,7 @@ export function MaterialDialog({ open, onClose, material }: MaterialDialogProps)
         stock: 0,
       });
     }
-  }, [material]);
+  }, [material, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,16 +57,31 @@ export function MaterialDialog({ open, onClose, material }: MaterialDialogProps)
       if (material) {
         // Update existing material
         await apiClient.put(`/api/materials/${material.id}`, formData);
+        toast.success('Material updated successfully!');
       } else {
         // Create new material
         await apiClient.post('/api/materials', formData);
+        toast.success('Material created successfully!');
       }
       onClose();
     } catch (error) {
       console.error('Failed to save material:', error);
+      toast.error('Failed to save material. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      name: '',
+      category: '',
+      supplier: '',
+      unitPrice: 0,
+      unit: '',
+      stock: 0,
+    });
+    onClose();
   };
 
   return (
@@ -77,69 +94,102 @@ export function MaterialDialog({ open, onClose, material }: MaterialDialogProps)
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Name *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Enter material name"
               required
+              disabled={loading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Category *</Label>
             <Input
               id="category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              placeholder="Enter category"
               required
+              disabled={loading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="supplier">Supplier</Label>
+            <Label htmlFor="supplier">Supplier *</Label>
             <Input
               id="supplier"
               value={formData.supplier}
               onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+              placeholder="Enter supplier name"
               required
+              disabled={loading}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="unitPrice">Unit Price</Label>
+              <Label htmlFor="unitPrice">Unit Price *</Label>
               <Input
                 id="unitPrice"
                 type="number"
+                min="0"
+                step="0.01"
                 value={formData.unitPrice}
-                onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unit">Unit</Label>
+              <Label htmlFor="unit">Unit *</Label>
               <Input
                 id="unit"
                 value={formData.unit}
                 onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                placeholder="kg, ton, piece"
                 required
+                disabled={loading}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="stock">Stock</Label>
+            <Label htmlFor="stock">Stock *</Label>
             <Input
               id="stock"
               type="number"
+              min="0"
+              step="0.01"
               value={formData.stock}
-              onChange={(e) => setFormData({ ...formData, stock: parseFloat(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, stock: parseFloat(e.target.value) || 0 })}
+              placeholder="0.00"
               required
+              disabled={loading}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleCancel}
+              disabled={loading}
+              className="btn-animate"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save'}
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="btn-animate"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {material ? 'Updating...' : 'Creating...'}
+                </>
+              ) : (
+                material ? 'Update Material' : 'Create Material'
+              )}
             </Button>
           </div>
         </form>
