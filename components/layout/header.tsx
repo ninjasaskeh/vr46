@@ -71,15 +71,14 @@ export function Header({ user, notificationCount = 0 }: HeaderProps) {
     }
   }, [])
 
-  const handleSignOut = () => {
-    toast.promise(
-      signOut({ callbackUrl: '/sign-in' }),
-      {
-        loading: 'Signing out...',
-        success: 'Signed out successfully',
-        error: 'Failed to sign out',
-      }
-    )
+  const handleSignOut = async () => {
+    try {
+      toast.loading('Signing out...')
+      await signOut({ callbackUrl: '/sign-in' })
+      toast.success('Signed out successfully')
+    } catch (error) {
+      toast.error('Failed to sign out')
+    }
   }
 
   const handleRefresh = () => {

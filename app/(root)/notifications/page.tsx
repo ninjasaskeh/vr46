@@ -43,24 +43,32 @@ export default function NotificationsPage() {
   };
 
   const markAllAsRead = async () => {
-    toast.promise(
-      apiClient.patch('/api/notifications?action=markAllRead', {}),
-      {
-        loading: 'Marking all as read...',
-        success: () => {
-          fetchNotifications();
-          return 'All notifications marked as read';
-        },
-        error: 'Failed to mark notifications as read',
+    try {
+      setLoading(true);
+      const response = await apiClient.patch('/api/notifications?action=markAllRead', {});
+      if (response.success) {
+        fetchNotifications();
+        toast.success('All notifications marked as read');
+      } else {
+        toast.error('Failed to mark notifications as read');
       }
-    );
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error);
+      toast.error('Failed to mark notifications as read');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await apiClient.patch(`/api/notifications/${notificationId}`, {});
-      fetchNotifications();
-      toast.success('Notification marked as read');
+      const response = await apiClient.patch(`/api/notifications/${notificationId}`, {});
+      if (response.success) {
+        fetchNotifications();
+        toast.success('Notification marked as read');
+      } else {
+        toast.error('Failed to mark notification as read');
+      }
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
       toast.error('Failed to mark notification as read');
@@ -125,12 +133,12 @@ export default function NotificationsPage() {
           <p className="text-gray-500 dark:text-gray-400">Stay updated with system alerts and activities</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleRefresh} variant="outline" className="btn-animate">
+          <Button onClick={handleRefresh} variant="outline" className="btn-animate" disabled={loading}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           {unreadCount > 0 && (
-            <Button onClick={markAllAsRead} variant="outline" className="flex items-center gap-2 btn-animate">
+            <Button onClick={markAllAsRead} variant="outline" className="flex items-center gap-2 btn-animate" disabled={loading}>
               <CheckCheck className="h-4 w-4" />
               Mark All Read ({unreadCount})
             </Button>
@@ -152,6 +160,7 @@ export default function NotificationsPage() {
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
               className="btn-animate"
+              disabled={loading}
             >
               All ({notifications.length})
             </Button>
@@ -159,6 +168,7 @@ export default function NotificationsPage() {
               variant={filter === 'unread' ? 'default' : 'outline'}
               onClick={() => setFilter('unread')}
               className="btn-animate"
+              disabled={loading}
             >
               Unread ({unreadCount})
             </Button>

@@ -47,6 +47,10 @@ export default function SignInPage() {
     toast.info('Demo credentials filled. Click Sign In to continue.');
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 p-4">
       <div className="w-full max-w-md">
@@ -99,7 +103,8 @@ export default function SignInPage() {
                     variant="ghost"
                     size="icon"
                     className="absolute right-0 top-0 h-11 w-10"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={togglePasswordVisibility}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -139,6 +144,7 @@ export default function SignInPage() {
                   onClick={() => handleDemoLogin('admin@company.com', 'admin123')}
                   className="btn-animate"
                   disabled={loading}
+                  type="button"
                 >
                   Admin
                 </Button>
@@ -148,6 +154,7 @@ export default function SignInPage() {
                   onClick={() => handleDemoLogin('manager@company.com', 'manager123')}
                   className="btn-animate"
                   disabled={loading}
+                  type="button"
                 >
                   Manager
                 </Button>
@@ -157,6 +164,7 @@ export default function SignInPage() {
                   onClick={() => handleDemoLogin('marketing@company.com', 'marketing123')}
                   className="btn-animate"
                   disabled={loading}
+                  type="button"
                 >
                   Marketing
                 </Button>
@@ -166,6 +174,7 @@ export default function SignInPage() {
                   onClick={() => handleDemoLogin('operator@company.com', 'operator123')}
                   className="btn-animate"
                   disabled={loading}
+                  type="button"
                 >
                   Operator
                 </Button>

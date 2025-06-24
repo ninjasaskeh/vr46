@@ -21,12 +21,12 @@ export function NotificationsPanel() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await apiClient.get<Notification[]>('/api/notifications', {
+      const response = await apiClient.get<{ data: Notification[] }>('/api/notifications', {
         limit: '5',
         unreadOnly: 'true',
       });
       if (response.success && response.data) {
-        setNotifications(response.data);
+        setNotifications(response.data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -36,17 +36,21 @@ export function NotificationsPanel() {
   };
 
   const markAllAsRead = async () => {
-    toast.promise(
-      apiClient.patch('/api/notifications?action=markAllRead', {}),
-      {
-        loading: 'Marking all as read...',
-        success: () => {
-          setNotifications([]);
-          return 'All notifications marked as read';
-        },
-        error: 'Failed to mark notifications as read',
+    try {
+      setLoading(true);
+      const response = await apiClient.patch('/api/notifications?action=markAllRead', {});
+      if (response.success) {
+        setNotifications([]);
+        toast.success('All notifications marked as read');
+      } else {
+        toast.error('Failed to mark notifications as read');
       }
-    );
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error);
+      toast.error('Failed to mark notifications as read');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getNotificationIcon = (type: string) => {
@@ -130,6 +134,7 @@ export function NotificationsPanel() {
                 variant="outline"
                 size="sm"
                 onClick={markAllAsRead}
+                disabled={loading}
                 className="flex items-center gap-1 btn-animate"
               >
                 <CheckCheck className="h-3 w-3" />
