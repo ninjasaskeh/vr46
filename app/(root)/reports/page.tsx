@@ -28,13 +28,13 @@ export default function ReportsPage() {
       setLoading(true);
       const [statsResponse, recordsResponse, materialsResponse] = await Promise.all([
         apiClient.get<DashboardStats>('/api/dashboard/stats'),
-        apiClient.get<WeightRecord[]>('/api/weight-records', { limit: '100' }),
-        apiClient.get<Material[]>('/api/materials', { limit: '100' }),
+        apiClient.get<{ data: WeightRecord[] }>('/api/weight-records', { limit: '100' }),
+        apiClient.get<{ data: Material[] }>('/api/materials', { limit: '100' }),
       ]);
 
-      if (statsResponse.success) setStats(statsResponse.data!);
-      if (recordsResponse.success) setWeightRecords(recordsResponse.data!);
-      if (materialsResponse.success) setMaterials(materialsResponse.data!);
+      if (statsResponse.success && statsResponse.data) setStats(statsResponse.data);
+      if (recordsResponse.success && recordsResponse.data) setWeightRecords(recordsResponse.data.data || []);
+      if (materialsResponse.success && materialsResponse.data) setMaterials(materialsResponse.data.data || []);
     } catch (error) {
       console.error('Failed to fetch report data:', error);
     } finally {
@@ -178,19 +178,13 @@ export default function ReportsPage() {
                   <div>
                     <h4 className="font-semibold mb-2">Top Materials by Weight</h4>
                     <div className="space-y-2">
-                      {completedRecords
-                        .reduce((acc, record) => {
+                      {Object.entries(
+                        completedRecords.reduce((acc, record) => {
                           const materialName = record.material?.name || 'Unknown';
                           acc[materialName] = (acc[materialName] || 0) + record.netWeight;
                           return acc;
                         }, {} as Record<string, number>)
-                        && Object.entries(
-                          completedRecords.reduce((acc, record) => {
-                            const materialName = record.material?.name || 'Unknown';
-                            acc[materialName] = (acc[materialName] || 0) + record.netWeight;
-                            return acc;
-                          }, {} as Record<string, number>)
-                        )
+                      )
                         .sort(([,a], [,b]) => b - a)
                         .slice(0, 5)
                         .map(([material, weight]) => (
@@ -257,7 +251,7 @@ export default function ReportsPage() {
                       <div className="flex justify-between">
                         <span>Average Unit Price</span>
                         <span className="font-medium">
-                          {formatCurrency(materials.reduce((sum, m) => sum + m.unitPrice, 0) / materials.length)}
+                          {formatCurrency(materials.length > 0 ? materials.reduce((sum, m) => sum + m.unitPrice, 0) / materials.length : 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -297,7 +291,7 @@ export default function ReportsPage() {
                   <div>
                     <h4 className="font-semibold mb-2">Efficiency Rate</h4>
                     <div className="text-2xl font-bold">
-                      {((completedRecords.length / weightRecords.length) * 100).toFixed(1)}%
+                      {weightRecords.length > 0 ? ((completedRecords.length / weightRecords.length) * 100).toFixed(1) : 0}%
                     </div>
                     <p className="text-sm text-muted-foreground">Completion rate</p>
                   </div>
