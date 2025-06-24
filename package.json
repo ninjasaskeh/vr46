@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",
@@ -40,6 +42,7 @@
     "react-hook-form": "^7.57.0",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^3.25.64"
   },
   "devDependencies": {
