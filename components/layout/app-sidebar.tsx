@@ -21,6 +21,8 @@ import {
   CheckCircle,
   Clock,
   Database,
+  Zap,
+  Wifi
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -171,7 +173,7 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md">
             <Scale className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
@@ -198,7 +200,7 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
                       {item.badge && (
-                        <Badge variant="secondary" className="ml-auto h-5 px-1.5 text-xs">
+                        <Badge variant="secondary" className="ml-auto h-5 px-1.5 text-xs animate-pulse">
                           {item.badge}
                         </Badge>
                       )}
@@ -227,7 +229,7 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                         {item.badge && (
-                          <Badge variant="destructive" className="ml-auto h-5 px-1.5 text-xs">
+                          <Badge variant="destructive" className="ml-auto h-5 px-1.5 text-xs animate-pulse">
                             {item.badge}
                           </Badge>
                         )}
@@ -286,7 +288,7 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
                       {item.badge && (
-                        <Badge variant="destructive" className="ml-auto h-5 px-1.5 text-xs">
+                        <Badge variant="destructive" className="ml-auto h-5 px-1.5 text-xs animate-pulse">
                           {item.badge}
                         </Badge>
                       )}
@@ -303,28 +305,40 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
           <SidebarGroupLabel>Quick Stats</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="grid gap-2 px-2 py-1">
-              <div className="flex items-center gap-2 rounded-md bg-muted/50 p-2">
-                <Activity className="size-4 text-green-600" />
+              <div className="flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-950 p-2 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-1">
+                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                  <Wifi className="size-4 text-green-600" />
+                </div>
                 <div className="flex-1 text-xs">
-                  <div className="font-medium">System Status</div>
-                  <div className="text-muted-foreground">Online</div>
+                  <div className="font-medium text-green-900 dark:text-green-100">System Online</div>
+                  <div className="text-green-700 dark:text-green-300">All systems operational</div>
                 </div>
               </div>
               {stats && (
                 <>
-                  <div className="flex items-center gap-2 rounded-md bg-muted/50 p-2">
+                  <div className="flex items-center gap-2 rounded-md bg-blue-50 dark:bg-blue-950 p-2 border border-blue-200 dark:border-blue-800">
                     <TrendingUp className="size-4 text-blue-600" />
                     <div className="flex-1 text-xs">
-                      <div className="font-medium">Today Records</div>
-                      <div className="text-muted-foreground">{stats.todayRecords}</div>
+                      <div className="font-medium text-blue-900 dark:text-blue-100">Today Records</div>
+                      <div className="text-blue-700 dark:text-blue-300">{stats.todayRecords} operations</div>
                     </div>
                   </div>
                   {stats.lowStockMaterials > 0 && (
-                    <div className="flex items-center gap-2 rounded-md bg-orange-50 p-2 dark:bg-orange-950">
+                    <div className="flex items-center gap-2 rounded-md bg-orange-50 p-2 dark:bg-orange-950 border border-orange-200 dark:border-orange-800">
                       <AlertTriangle className="size-4 text-orange-600" />
                       <div className="flex-1 text-xs">
-                        <div className="font-medium">Low Stock</div>
-                        <div className="text-muted-foreground">{stats.lowStockMaterials} items</div>
+                        <div className="font-medium text-orange-900 dark:text-orange-100">Low Stock Alert</div>
+                        <div className="text-orange-700 dark:text-orange-300">{stats.lowStockMaterials} items need attention</div>
+                      </div>
+                    </div>
+                  )}
+                  {stats.unreadNotifications > 0 && (
+                    <div className="flex items-center gap-2 rounded-md bg-purple-50 p-2 dark:bg-purple-950 border border-purple-200 dark:border-purple-800">
+                      <Bell className="size-4 text-purple-600" />
+                      <div className="flex-1 text-xs">
+                        <div className="font-medium text-purple-900 dark:text-purple-100">New Notifications</div>
+                        <div className="text-purple-700 dark:text-purple-300">{stats.unreadNotifications} unread messages</div>
                       </div>
                     </div>
                   )}
@@ -338,10 +352,10 @@ export function AppSidebar({ user, stats, ...props }: AppSidebarProps) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2 px-2 py-1.5">
-              <Avatar className="h-8 w-8">
+            <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/50">
+              <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                 <AvatarImage src="" alt={user.name || ""} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xs font-semibold">
                   {getInitials(user.name)}
                 </AvatarFallback>
               </Avatar>

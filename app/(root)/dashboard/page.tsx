@@ -17,9 +17,14 @@ import {
   Zap,
   Database,
   Wifi,
-  RefreshCw
+  RefreshCw,
+  Package,
+  Scale,
+  Truck,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { data: stats, loading: statsLoading, refetch: refetchStats } = useDashboardStats();
@@ -82,7 +87,9 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
           <p className="text-muted-foreground">
             Welcome to your IoT weighing management system
           </p>
@@ -92,7 +99,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4" />
             <span>Last updated: {lastUpdate.toLocaleTimeString('id-ID')}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="btn-animate">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -100,7 +107,7 @@ export default function DashboardPage() {
       </div>
 
       {/* System Status Banner */}
-      <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+      <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 dark:border-green-800 card-hover">
         <CardContent className="flex items-center gap-4 pt-6">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
@@ -152,7 +159,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -161,29 +168,29 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-              <a href="/materials">
+            <Button variant="outline" className="h-20 flex-col gap-2 btn-animate card-hover" asChild>
+              <Link href="/materials">
                 <Package className="h-6 w-6" />
                 <span>Add Material</span>
-              </a>
+              </Link>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-              <a href="/weight-records">
+            <Button variant="outline" className="h-20 flex-col gap-2 btn-animate card-hover" asChild>
+              <Link href="/weight-records">
                 <Scale className="h-6 w-6" />
                 <span>View Records</span>
-              </a>
+              </Link>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-              <a href="/suppliers">
+            <Button variant="outline" className="h-20 flex-col gap-2 btn-animate card-hover" asChild>
+              <Link href="/suppliers">
                 <Truck className="h-6 w-6" />
                 <span>Manage Suppliers</span>
-              </a>
+              </Link>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-              <a href="/reports">
+            <Button variant="outline" className="h-20 flex-col gap-2 btn-animate card-hover" asChild>
+              <Link href="/reports">
                 <BarChart3 className="h-6 w-6" />
                 <span>Generate Report</span>
-              </a>
+              </Link>
             </Button>
           </div>
         </CardContent>
@@ -191,7 +198,7 @@ export default function DashboardPage() {
 
       {/* Real-time Status Indicator */}
       <div className="fixed bottom-4 right-4 z-50">
-        <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 dark:from-green-950 dark:to-emerald-950 dark:border-green-800 shadow-lg">
           <CardContent className="flex items-center gap-2 p-3">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-sm font-medium text-green-700 dark:text-green-300">

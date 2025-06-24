@@ -11,7 +11,8 @@ import {
   Wifi,
   WifiOff,
   Database,
-  Server
+  Server,
+  RefreshCw
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -28,6 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 interface HeaderProps {
   user: {
@@ -50,8 +52,14 @@ export function Header({ user, notificationCount = 0 }: HeaderProps) {
     }, 1000)
 
     // Monitor online status
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    const handleOnline = () => {
+      setIsOnline(true)
+      toast.success("Connection restored")
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      toast.error("Connection lost")
+    }
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
@@ -64,7 +72,28 @@ export function Header({ user, notificationCount = 0 }: HeaderProps) {
   }, [])
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/sign-in' })
+    toast.promise(
+      signOut({ callbackUrl: '/sign-in' }),
+      {
+        loading: 'Signing out...',
+        success: 'Signed out successfully',
+        error: 'Failed to sign out',
+      }
+    )
+  }
+
+  const handleRefresh = () => {
+    toast.promise(
+      new Promise((resolve) => {
+        window.location.reload()
+        setTimeout(resolve, 1000)
+      }),
+      {
+        loading: 'Refreshing page...',
+        success: 'Page refreshed',
+        error: 'Failed to refresh',
+      }
+    )
   }
 
   const getInitials = (name?: string | null) => {
@@ -131,17 +160,22 @@ export function Header({ user, notificationCount = 0 }: HeaderProps) {
           </div>
         </div>
 
+        {/* Refresh Button */}
+        <Button variant="outline" size="icon" onClick={handleRefresh} className="btn-animate">
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+
         {/* Theme Toggle */}
         <ThemeToggle />
 
         {/* Notifications */}
-        <Button variant="outline" size="icon" className="relative" asChild>
+        <Button variant="outline" size="icon" className="relative btn-animate" asChild>
           <Link href="/notifications">
             <Bell className="h-4 w-4" />
             {notificationCount > 0 && (
               <Badge 
                 variant="destructive" 
-                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0"
+                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0 animate-pulse"
               >
                 {notificationCount > 99 ? '99+' : notificationCount}
               </Badge>
@@ -152,7 +186,7 @@ export function Header({ user, notificationCount = 0 }: HeaderProps) {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full btn-animate">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" alt={user.name || ""} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">

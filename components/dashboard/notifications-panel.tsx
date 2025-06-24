@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCheck, AlertTriangle, Info, CheckCircle, X } from 'lucide-react';
+import { Bell, CheckCheck, AlertTriangle, Info, CheckCircle, X, ExternalLink } from 'lucide-react';
 import { Notification } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export function NotificationsPanel() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -34,12 +36,17 @@ export function NotificationsPanel() {
   };
 
   const markAllAsRead = async () => {
-    try {
-      await apiClient.patch('/api/notifications?action=markAllRead', {});
-      setNotifications([]);
-    } catch (error) {
-      console.error('Failed to mark notifications as read:', error);
-    }
+    toast.promise(
+      apiClient.patch('/api/notifications?action=markAllRead', {}),
+      {
+        loading: 'Marking all as read...',
+        success: () => {
+          setNotifications([]);
+          return 'All notifications marked as read';
+        },
+        error: 'Failed to mark notifications as read',
+      }
+    );
   };
 
   const getNotificationIcon = (type: string) => {
@@ -58,32 +65,32 @@ export function NotificationsPanel() {
   const getNotificationColor = (type: string) => {
     switch (type) {
       case 'WARNING':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 dark:from-yellow-950 dark:to-orange-950 dark:border-yellow-800';
       case 'ERROR':
-        return 'bg-red-50 border-red-200';
+        return 'bg-gradient-to-r from-red-50 to-pink-50 border-red-200 dark:from-red-950 dark:to-pink-950 dark:border-red-800';
       case 'SUCCESS':
-        return 'bg-green-50 border-green-200';
+        return 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 dark:from-green-950 dark:to-emerald-950 dark:border-green-800';
       default:
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950 dark:to-indigo-950 dark:border-blue-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'HIGH':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'NORMAL':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'LOW':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   if (loading) {
     return (
-      <Card>
+      <Card className="card-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
@@ -105,42 +112,52 @@ export function NotificationsPanel() {
   }
 
   return (
-    <Card>
+    <Card className="card-hover">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
             Notifications
             {notifications.length > 0 && (
-              <Badge variant="destructive" className="ml-2">
+              <Badge variant="destructive" className="ml-2 animate-pulse">
                 {notifications.length}
               </Badge>
             )}
           </CardTitle>
-          {notifications.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={markAllAsRead}
-              className="flex items-center gap-1"
-            >
-              <CheckCheck className="h-3 w-3" />
-              Mark All Read
+          <div className="flex items-center gap-2">
+            {notifications.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={markAllAsRead}
+                className="flex items-center gap-1 btn-animate"
+              >
+                <CheckCheck className="h-3 w-3" />
+                Mark All Read
+              </Button>
+            )}
+            <Button variant="outline" size="sm" asChild className="btn-animate">
+              <Link href="/notifications">
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             </Button>
-          )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">
-              No new notifications
-            </p>
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold text-muted-foreground">All caught up!</h3>
+              <p className="text-sm text-muted-foreground">No new notifications</p>
+            </div>
           ) : (
-            notifications.map((notification) => (
+            notifications.map((notification, index) => (
               <div
                 key={notification.id}
-                className={`p-3 rounded-lg border ${getNotificationColor(notification.type)}`}
+                className={`p-3 rounded-lg border ${getNotificationColor(notification.type)} card-hover`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-start gap-3">
                   {getNotificationIcon(notification.type)}
@@ -155,7 +172,9 @@ export function NotificationsPanel() {
                       {notification.message}
                     </p>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{notification.category}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {notification.category}
+                      </Badge>
                       <span>{formatDate(notification.createdAt)}</span>
                     </div>
                   </div>
